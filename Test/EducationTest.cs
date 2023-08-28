@@ -9,6 +9,7 @@ namespace CompetitionTaskMars.Test
 {
     
     [TestFixture]
+    //[Parallelizable]
     public class EducationTest:MarsBaseClass
     {
         private List<EducationDataList> educationData;
@@ -51,14 +52,15 @@ namespace CompetitionTaskMars.Test
         public void EditEducation()
         {
             MarsBaseClass.NavigateToProfileEducation();
-            string toBeEditDegree = "Information Technology";
+            string toBeEditTitle = "B.Tech";
+            string toBeEditDegree = "IT";
             string editCountry = "India";
-            string editUniversty = "Madras institute of technologies";
+            string editUniversty = "Madras Institute of Technologies";
             string editTitle = "B.Tech";
             string editDegree = "Information Technology";
             string editGradYear = "2004";
 
-            ProfilePageObj.EnterEditEducation(toBeEditDegree, editCountry, editUniversty, editTitle, editDegree, editGradYear);
+            ProfilePageObj.EnterEditEducation(toBeEditTitle,toBeEditDegree, editCountry, editUniversty, editTitle, editDegree, editGradYear);
             var updateEducationStatus = ProfilePageObj.ValidateUpdatedEducation(editCountry, editUniversty, editTitle, editDegree, editGradYear);
             if (updateEducationStatus.Item1 == "N")
             {
@@ -68,10 +70,16 @@ namespace CompetitionTaskMars.Test
         [Test,Order(3)]
         public void DeleteEducation()
         {
-            string deleteEducationTitle= "B.Tech";
-            string deleteEducationDegree = "Information Technology";
+            string deleteEducationTitle= "B.Sc";
+            string deleteEducationDegree = "Analytics";
             MarsBaseClass.NavigateToProfileEducation();
             ProfilePageObj.DeleteEducation(deleteEducationTitle, deleteEducationDegree);
+            
+            var deleteEducationStatus = ProfilePageObj.ValidateEducationDeletion(deleteEducationTitle, deleteEducationDegree);
+            if (deleteEducationStatus.Item1 == "N")
+            {
+                Assert.Fail(deleteEducationStatus.Item2);
+            }
         }
 
         [TearDown]

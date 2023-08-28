@@ -1,6 +1,7 @@
 ﻿using CompetitionTaskMars;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
+using Org.BouncyCastle.Tls;
 using static CompetionTaskMarsAutomation.Utility.JsonLibHelper;
 
 namespace CompetionTaskMarsAutomation.Pages
@@ -81,14 +82,46 @@ namespace CompetionTaskMarsAutomation.Pages
             }
             return (InsertStatus: newEducationStatus, InsertMessage: newEducationMessage);
         }
-        public void EnterEditEducation(string toBeEditDegree, string editCountry, string editUniversty, string editTitle, string editDegree, string editGradYear)
+        public void EnterEditEducation(string toBeEditTitle,string toBeEditDegree, string editCountry, string editUniversty, string editTitle, string editDegree, string editGradYear)
         {
-            Console.WriteLine(EnterEditEducation);
-            IWebElement editButton = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table/tbody[1]/tr/td[6]/span[1]"));
-            editButton.Click();
-            TurnOnWait();
-            EnterEducation(editCountry, editUniversty, editTitle, editDegree, editGradYear);
-            driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table/tbody[1]/tr/td/div[3]/input[1]")).Click();
+            /* IWebElement editButton = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table/tbody[1]/tr/td[6]/span[1]"));
+             editButton.Click();
+             TurnOnWait();
+             EnterEducation(editCountry, editUniversty, editTitle, editDegree, editGradYear);
+             driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table/tbody[1]/tr/td/div[3]/input[1]")).Click();*/
+           
+            String educationUpdationStatus = "";
+            IWebElement educationTable = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table"));
+            List<IWebElement> allEducationRow = new List<IWebElement>(educationTable.FindElements(By.TagName("tbody")));
+            foreach (var row in allEducationRow)
+            {
+                var resultCols = row.FindElements(By.TagName("td"));
+
+                if ((resultCols[2].Text == toBeEditTitle) &&(resultCols[3].Text == toBeEditDegree))
+                {
+                    Console.WriteLine("can be edited");
+                    List<IWebElement> allIconsRow = new List<IWebElement>(row.FindElements(By.TagName("i")));
+                    foreach (var icon in allIconsRow)
+                    {
+                        if (icon.GetAttribute("class") == "outline write icon")
+                        {
+                            icon.Click();
+                            EnterEducation(editCountry, editUniversty, editTitle, editDegree, editGradYear);
+                            driver.FindElement(By.CssSelector("input[class*='ui teal button']")).Click();
+                            break;
+                        }
+                        else
+                        {
+                            educationUpdationStatus = "Undefined Error";
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("can not be edited");
+                    educationUpdationStatus = "The education intented to update is not in the list";
+                }
+            }
         }
 
         public (String, String) ValidateUpdatedEducation(string updatedCountry, string updatedUniversty, string updatedTitle, string updatedDegree, string updatedGradYear)
@@ -102,16 +135,17 @@ namespace CompetionTaskMarsAutomation.Pages
             foreach (var row in allEducationRow)
             {
                 var resultCols = row.FindElements(By.TagName("td"));
-                Console.WriteLine($"resultCols[2].Text{resultCols[2].Text} and resultCols[3].Text{resultCols[3].Text}");
 
                 if ((resultCols[2].Text == updatedTitle) && (resultCols[3].Text == updatedDegree))
                 {
+                    Console.WriteLine("Okay");
                     updateEducationStatus = "Y";
                     updateEducationMessage = "Education Updated successfully";
                     break;
                 }
                 else
                 {
+                    Console.WriteLine("not Okay");
                     updateEducationMessage = "Education Updation failed";
                 }
             }
@@ -119,8 +153,37 @@ namespace CompetionTaskMarsAutomation.Pages
         }
         public void DeleteEducation(string deleteEducationTitle, string deleteEducationDegree)
         {
-            IWebElement deleteEducationButton = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table/tbody[1]/tr/td[6]/span[2]/i"));
-            deleteEducationButton.Click();
+            /*IWebElement deleteEducationButton = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table/tbody[1]/tr/td[6]/span[2]/i"));
+            deleteEducationButton.Click();*/
+            String educationDeleteStatus = "";
+            IWebElement educationTable = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table"));
+            List<IWebElement> allEducationRow = new List<IWebElement>(educationTable.FindElements(By.TagName("tbody")));
+            foreach (var row in allEducationRow)
+            {
+                var resultCols = row.FindElements(By.TagName("td"));
+                if ((resultCols[2].Text == deleteEducationTitle)&&(resultCols[3].Text == deleteEducationDegree))
+                {
+                    List<IWebElement> allIconsRow = new List<IWebElement>(row.FindElements(By.TagName("i")));
+                    foreach (var icon in allIconsRow)
+                    {
+                        if (icon.GetAttribute("class") == "remove icon")
+                        {
+                            TurnOnWait();
+                            icon.Click();
+                            educationDeleteStatus = "";
+                        }
+                        else
+                        {
+                            educationDeleteStatus = "Undefined Error";
+                        }
+                    }
+                    break;
+                }
+                else
+                {
+                    educationDeleteStatus = "The education intented to delete is not in the list";
+                }
+            }
         }
 
         public (String, String) ValidateEducationDeletion(string deleteEducationTitle, string deleteEducationDegree)
@@ -138,6 +201,7 @@ namespace CompetionTaskMarsAutomation.Pages
                 {
                     deletionEducationStatus = "Y";
                     deletionEducationMessage = "Education deleted successfully";
+                    break;
                 }
                 else
                 {
@@ -150,7 +214,6 @@ namespace CompetionTaskMarsAutomation.Pages
         private void AddCertificateData(string certificate, string from, string year)
         {
             driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/thead/tr/th[4]/div")).Click();
-            TurnOnWait();
             EnterCertificate(certificate,from,year);
             driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/div/div[3]/input[1]")).Click();
         }
@@ -213,11 +276,42 @@ namespace CompetionTaskMarsAutomation.Pages
 
         public void EnterEditCertificate(string certificate, string newCertificate, string newFrom, string newYear)
         {
-            IWebElement editButton = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/tbody[1]/tr/td[4]/span[1]/i"));
+            /*IWebElement editButton = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/tbody[1]/tr/td[4]/span[1]/i"));
             editButton.Click();
-            TurnOnWait();
             EnterCertificate(newCertificate, newFrom, newYear);
-            driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/tbody[1]/tr/td/div/span/input[1]")).Click();
+            driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/tbody[1]/tr/td/div/span/input[1]")).Click();*/
+            String educationDeleteStatus = "";
+            IWebElement certificateTable = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table"));
+            List<IWebElement> allCertificateRow = new List<IWebElement>(certificateTable.FindElements(By.TagName("tbody")));
+            foreach (var row in allCertificateRow)
+            {
+                var resultCols = row.FindElements(By.TagName("td"));
+                if ((resultCols[0].Text == certificate))
+                 {
+                    List<IWebElement> allIconsRow = new List<IWebElement>(row.FindElements(By.TagName("i")));
+                     foreach (var icon in allIconsRow)
+                     {
+                         if (icon.GetAttribute("class") == "outline write icon")
+                         {
+                            icon.Click();
+                            EnterCertificate(newCertificate, newFrom, newYear);
+                            //driver.FindElement(By.ClassName("ui teal button")).Click();
+                            driver.FindElement(By.CssSelector("input[class*='ui teal button']")).Click();
+                            educationDeleteStatus = "";
+                            break;
+                        }
+                         else
+                         {
+                             educationDeleteStatus = "Undefined Error";
+                         }
+                     }
+                    
+                 }
+                 else
+                 {
+                    educationDeleteStatus = "The education intented to delete is not in the list";
+                }
+            }
         }
 
         public (String, String) ValidateUpdatedCertificate(string certificate, string newcertificate)
@@ -232,7 +326,6 @@ namespace CompetionTaskMarsAutomation.Pages
             foreach (var row in allCertificateRow)
             {
                 var resultCols = row.FindElements(By.TagName("td"));
-                Console.WriteLine($"resultCols[2].Text{resultCols[2].Text} and resultCols[3].Text{resultCols[3].Text}");
 
                 if ((resultCols[0].Text == newcertificate))
                 {
@@ -250,8 +343,37 @@ namespace CompetionTaskMarsAutomation.Pages
 
         public void DeleteCertificate(string deleteCertificate)
         {
-            IWebElement deleteEducationButton = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/tbody[1]/tr/td[4]/span[2]/i"));
-            deleteEducationButton.Click();
+            /*IWebElement deleteEducationButton = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/tbody[1]/tr/td[4]/span[2]/i"));
+            deleteEducationButton.Click();*/
+            String certificateDeleteStatus = "";
+            IWebElement certificateTable = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table"));
+            List<IWebElement> allEducationRow = new List<IWebElement>(certificateTable.FindElements(By.TagName("tbody")));
+            foreach (var row in allEducationRow)
+            {
+                var resultCols = row.FindElements(By.TagName("td"));
+                if (resultCols[0].Text == deleteCertificate)
+                {
+                    List<IWebElement> allIconsRow = new List<IWebElement>(row.FindElements(By.TagName("i")));
+                    foreach (var icon in allIconsRow)
+                    {
+                        if (icon.GetAttribute("class") == "remove icon")
+                        {
+                            TurnOnWait();
+                            icon.Click();
+                            certificateDeleteStatus = "";
+                        }
+                        else
+                        {
+                            certificateDeleteStatus = "Undefined Error";
+                        }
+                    }
+                    break;
+                }
+                else
+                {
+                    certificateDeleteStatus = "The certificate intented to delete is not in the list";
+                }
+            }
         }
 
         public (String, String) ValidateCertificateDeletion(string deleteCertificate)
@@ -270,6 +392,7 @@ namespace CompetionTaskMarsAutomation.Pages
                 {
                     deletionCertificateStatus = "Y";
                     deletionCertificateMessage = "Education deleted successfully";
+                    break;
                 }
                 else
                 {

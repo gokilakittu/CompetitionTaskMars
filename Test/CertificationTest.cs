@@ -8,6 +8,7 @@ using static CompetionTaskMarsAutomation.Utility.JsonLibHelper;
 namespace CompetitionTaskMars.Test
 {
     [TestFixture]
+    //[Parallelizable]
     public class CertificationTest: MarsBaseClass
     {
         private List<CertificateDataList> certificateData;
@@ -49,7 +50,7 @@ namespace CompetitionTaskMars.Test
         public void EditCertification()
         {
             MarsBaseClass.NavigateToProfileCertification();
-            string certificate = "ISTQB-Foundation";
+            string certificate = "certificate1";
             string newCertificate = "ISTQB-Agile";
             string newFrom = "ISTQB";
             string newYear = "2021";
@@ -65,14 +66,14 @@ namespace CompetitionTaskMars.Test
         [Test, Order(3)]
         public void DeleteCertification()
         {
-            string deleteCertificate = "ISTQB-Agile";
+            string deleteCertificate = "certificate2";
             MarsBaseClass.NavigateToProfileCertification();
             ProfilePageObj.DeleteCertificate(deleteCertificate);
 
-            var deletionStatus = ProfilePageObj.ValidateCertificateDeletion(deleteCertificate);
-            if (deletionStatus.Item1 == "N")
+            var deleteCertificationStatus = ProfilePageObj.ValidateCertificateDeletion(deleteCertificate);
+            if (deleteCertificationStatus.Item1 == "N")
             {
-                Assert.Fail(deletionStatus.Item2);
+                Assert.Fail(deleteCertificationStatus.Item2);
             }
         }
 
