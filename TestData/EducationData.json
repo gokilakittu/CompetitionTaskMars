@@ -1,0 +1,30 @@
+﻿[
+  {
+    "country": "India",
+    "university": "Madras institute of technologies",
+    "title": "B.Tech",
+    "degree": "Information Technology",
+    "graduationYear": 2005
+  },
+  {
+    "country": "New Zealand",
+    "university": "The University of Auckland",
+    "title": "M.Tech",
+    "degree": "Computer Science",
+    "graduationYear": 2010
+  },
+  {
+    "country": "New Zealand",
+    "university": "Auckland University of Technology",
+    "title": "B.Sc",
+    "degree": "Analytics",
+    "graduationYear": 2015
+  },
+  {
+    "country": "Australia",
+    "university": "University of Technology Sydney",
+    "title": "M.A",
+    "degree": "Data Science",
+    "graduationYear": 2020
+  }
+]
