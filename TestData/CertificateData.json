@@ -1,8 +1,8 @@
 ﻿[
   {
-    "certificate": "ISTQB-Foundation",
-    "from": "ISTQB",
-    "year": "2010"
+    "certificate": "certificate2",
+    "from": "The University of Auckland",
+    "year": "2011"
   },
   {
     "certificate": "certificate1",
@@ -13,10 +13,5 @@
     "certificate": "certificate2",
     "from": "The University of Auckland",
     "year": "2011"
-  },
-  {
-    "certificate": "certificate3",
-    "from": "The University of Auckland",
-    "year": "2012"
   }
 ]

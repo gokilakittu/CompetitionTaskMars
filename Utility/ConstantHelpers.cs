@@ -15,16 +15,16 @@ namespace CompetitionTaskMars.Utility
         public static string screenShotPath = "";
 
         //loginExcelSheetPath
-        public static string loginExcelSheetPath = @"C:\\Visual_studio_project\\CompetitionTaskMars\\TestData\\LoginExcelData.xlsx";
+        public static string loginExcelSheetPath = @"C:\\Visual_studio_project\\CompetitionTaskMarsAutomation\\TestData\\LoginExcelData.xlsx";
 
         //loginExcelSheetPath
-        public static string educationDataPath = @"C:\\Visual_studio_project\\CompetitionTaskMars\\TestData\\EducationData.json";
+        public static string educationDataPath = @"C:\\Visual_studio_project\\CompetitionTaskMarsAutomation\\TestData\\EducationData.json";
 
         //loginExcelSheetPath
-        public static string certificateDataPath = @"C:\\Visual_studio_project\\CompetitionTaskMars\\TestData\\CertificateData.json";
+        public static string certificateDataPath = @"C:\\Visual_studio_project\\CompetitionTaskMarsAutomation\\TestData\\CertificateData.json";
 
         //ExtentReportsPath
-        public static string extendReportsPath = @"C:\\Visual_studio_project\\CompetitionTaskMars\\TestReport\\";
+        public static string extendReportsPath = @"C:\\Visual_studio_project\\CompetitionTaskMarsAutomation\\TestReport\\";
 
         //Current User Name
         public static string currentUser = "";
