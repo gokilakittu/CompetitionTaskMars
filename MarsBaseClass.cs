@@ -5,20 +5,20 @@ using OpenQA.Selenium;
 namespace CompetitionTaskMars
 {
     /*
-     get url
-     page time out,
+    get url
+    page time out,
     implicit wait
     delete cookie
     maximize window*/
     public class MarsBaseClass
     {
         public static IWebDriver driver;
+        
         public static void Initialize()
         {
             driver = new ChromeDriver();
             TurnOnWait();
             driver.Manage().Window.Maximize();
-
         }
 
         public static void NavigateUrl()
@@ -34,7 +34,7 @@ namespace CompetitionTaskMars
         //Implicit Wait
         public static void TurnOnWait()
         {
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(20);
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(30);
             Thread.Sleep(2000);
         }
 
@@ -54,5 +54,6 @@ namespace CompetitionTaskMars
             driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[1]/a[4]")).Click();
 
         }
+
     }
 }

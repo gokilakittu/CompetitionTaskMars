@@ -14,6 +14,20 @@
     "graduationYear": 2010
   },
   {
+    "country": "India",
+    "university": "MIT",
+    "title": "B.Tech",
+    "degree": "IT",
+    "graduationYear": 2005
+  },
+  {
+    "country": "Australia",
+    "university": "University of Technology Sydney",
+    "title": "M.A",
+    "degree": "Data Science",
+    "graduationYear": 2020
+  },
+  {
     "country": "New Zealand",
     "university": "Auckland University of Technology",
     "title": "B.Sc",
@@ -25,6 +39,6 @@
     "university": "University of Technology Sydney",
     "title": "M.A",
     "degree": "Data Science",
-    "graduationYear": 2020
+    "graduationYear": 2021
   }
 ]

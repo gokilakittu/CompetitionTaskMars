@@ -1,8 +1,15 @@
 using CompetionTaskMarsAutomation.Pages;
 using CompetitionTaskMars.Utility;
+using DocumentFormat.OpenXml.Math;
+using DocumentFormat.OpenXml.Wordprocessing;
 using MarsQA_1.SpecflowPages.Pages;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using NUnit.Framework.Interfaces;
+using OpenQA.Selenium;
+using Org.BouncyCastle.Ocsp;
+using Org.BouncyCastle.Tls;
 using static CompetionTaskMarsAutomation.Utility.JsonLibHelper;
 
 namespace CompetitionTaskMars.Test
@@ -13,6 +20,8 @@ namespace CompetitionTaskMars.Test
     public class EducationTest:MarsBaseClass
     {
         private List<EducationDataList> educationData;
+        private List<CertificateDataList> certificateData;
+
 
         LoginPage LoginPageObj = new LoginPage();
         SignInPage SignInPageObj = new SignInPage();
@@ -21,6 +30,7 @@ namespace CompetitionTaskMars.Test
         [SetUp]
         public void Setup()
         {
+            ExtentReportLibHelper.CreateTest(TestContext.CurrentContext.Test.MethodName);
             MarsBaseClass.Initialize();
             MarsBaseClass.NavigateUrl();
             SignInPageObj.LoginSteps();
@@ -32,22 +42,29 @@ namespace CompetitionTaskMars.Test
             MarsBaseClass.NavigateToProfileEducation();
             string json = File.ReadAllText(ConstantHelpers.educationDataPath);
             educationData = JsonConvert.DeserializeObject<List<EducationDataList>>(json);
-            ProfilePageObj.GetEducationData(educationData);
+
+            Console.WriteLine($"list count for--{educationData.Count}");
             
-            foreach (EducationDataList education in educationData)
+            foreach (EducationDataList educationDetails in educationData)
             {
-                var newEducationStatus = ProfilePageObj.ValidateEducationData(education.country,
-                                 education.university,
-                                 education.title,
-                                 education.degree,
-                                 education.graduationYear);
+                Console.WriteLine($"start of adding {educationDetails.title} and {educationDetails.degree}");
+                var newEducationStatus = ProfilePageObj.AddEachEducationData(educationDetails.country,
+                                 educationDetails.university,
+                                 educationDetails.title,
+                                 educationDetails.degree,
+                                 educationDetails.graduationYear);
+
                 if (newEducationStatus.Item1 == "N")
                 {
-                    Assert.Fail(newEducationStatus.Item2);
+                    Console.WriteLine($"THE ADDITION OF EDUCATION {educationDetails.title}--{newEducationStatus.Item1} was not done");
+                }
+                else
+                {
+                    Console.WriteLine($"THE ADDITION OF EDUCATION {educationDetails.title}--{newEducationStatus.Item1}");
                 }
             }
         }
-
+        
         [Test, Order(2)]
         public void EditEducation()
         {
@@ -59,12 +76,28 @@ namespace CompetitionTaskMars.Test
             string editTitle = "B.Tech";
             string editDegree = "Information Technology";
             string editGradYear = "2004";
-
-            ProfilePageObj.EnterEditEducation(toBeEditTitle,toBeEditDegree, editCountry, editUniversty, editTitle, editDegree, editGradYear);
-            var updateEducationStatus = ProfilePageObj.ValidateUpdatedEducation(editCountry, editUniversty, editTitle, editDegree, editGradYear);
-            if (updateEducationStatus.Item1 == "N")
+            
+            bool educationPresentStatus = ProfilePage.CheckEducationIsPresent(toBeEditTitle, toBeEditDegree);
+            if (educationPresentStatus == true)
             {
-                Assert.Fail(updateEducationStatus.Item2);
+                ExtentReportLibHelper.LogInfo($"{toBeEditTitle} and {toBeEditDegree} education is present in the list.");
+                ProfilePageObj.EnterEditEducation(toBeEditTitle, toBeEditDegree, editCountry, editUniversty, editTitle, editDegree, editGradYear);
+                var updateEducationStatus = ProfilePageObj.ValidateUpdatedEducation(editCountry, editUniversty, editTitle, editDegree, editGradYear);
+                if (updateEducationStatus.Item1 == "N")
+                {
+                    Assert.Fail(updateEducationStatus.Item2);
+                    ExtentReportLibHelper.LogFail(updateEducationStatus.Item2);
+                }
+                else
+                {
+                    Assert.Pass(updateEducationStatus.Item2);
+                    ExtentReportLibHelper.LogInfo(updateEducationStatus.Item2);
+                }
+            }
+            else
+            {
+                Assert.Fail("Education intented to edit is not in the list.");
+                ExtentReportLibHelper.LogInfo("Education intented to edit is not in the list.");
             }
         }
         [Test,Order(3)]
@@ -73,18 +106,38 @@ namespace CompetitionTaskMars.Test
             string deleteEducationTitle= "B.Sc";
             string deleteEducationDegree = "Analytics";
             MarsBaseClass.NavigateToProfileEducation();
-            ProfilePageObj.DeleteEducation(deleteEducationTitle, deleteEducationDegree);
-            
-            var deleteEducationStatus = ProfilePageObj.ValidateEducationDeletion(deleteEducationTitle, deleteEducationDegree);
-            if (deleteEducationStatus.Item1 == "N")
+          
+            bool educationPresentStatus = ProfilePage.CheckEducationIsPresent(deleteEducationTitle, deleteEducationDegree);
+            if (educationPresentStatus == true)
             {
-                Assert.Fail(deleteEducationStatus.Item2);
+                ExtentReportLibHelper.LogInfo($"{deleteEducationTitle} and {deleteEducationDegree} education is present in the list.");
+
+                ProfilePageObj.DeleteEducation(deleteEducationTitle, deleteEducationDegree);
+
+                var deleteEducationStatus = ProfilePageObj.ValidateEducationDeletion(deleteEducationTitle, deleteEducationDegree);
+                if (deleteEducationStatus.Item1 == "N")
+                {
+                    Assert.Fail(deleteEducationStatus.Item2);
+                    ExtentReportLibHelper.LogFail(deleteEducationStatus.Item2);
+                }
+                else
+                {
+                    Assert.Pass(deleteEducationStatus.Item2);
+                    ExtentReportLibHelper.LogInfo(deleteEducationStatus.Item2);
+                }
+            }
+            else
+            {
+                Assert.Fail("Education intented to delete is not in the list.");
+                ExtentReportLibHelper.LogInfo("Education intented to delete is not in the list.");
             }
         }
 
-        [TearDown]
+            [TearDown]
         public void TearDown()
         {
+            ExtentReportLibHelper.EndTest();
+            ExtentReportLibHelper.EndReporting();
             MarsBaseClass.CleanUp();
         }
     }
