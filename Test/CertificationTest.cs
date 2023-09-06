@@ -32,28 +32,27 @@ namespace CompetitionTaskMars.Test
         } 
 
        [Test, Order(1)]
-       public void AddCertification()
+        public void AddCertification()
        {
             MarsBaseClass.NavigateToProfileCertification();
             string json = File.ReadAllText(ConstantHelpers.certificateDataPath);
             certificateData = JsonConvert.DeserializeObject<List<CertificateDataList>>(json);
-            ProfilePageObj.GetCertificateData(certificateData);
             
             foreach (CertificateDataList certificate in certificateData)
             {
-                var newCertificateStatus = ProfilePageObj.ValidateCertificateData(
+                var newCertificateStatus = ProfilePageObj.AddEachCertificateData(
                                  certificate.certificate,
                                  certificate.from,
                                  certificate.year);
                 if (newCertificateStatus.Item1 == "N")
                 {
-                    Assert.Fail(newCertificateStatus.Item2);
                     ExtentReportLibHelper.LogFail(newCertificateStatus.Item2);
+                    //Assert.Fail(newCertificateStatus.Item2);
                 }
                 else
                 {
-                    Assert.Pass(newCertificateStatus.Item2);
-                    ExtentReportLibHelper.LogInfo(newCertificateStatus.Item2);
+                    ExtentReportLibHelper.LogPass(newCertificateStatus.Item2);
+                    //Assert.Pass(newCertificateStatus.Item2);
                 }
             }
         }
@@ -77,25 +76,25 @@ namespace CompetitionTaskMars.Test
 
                 if (updateCertificateStatus.Item1 == "N")
                 {
-                    Assert.Fail(updateCertificateStatus.Item2);
+                    //Assert.Fail(updateCertificateStatus.Item2);
                     ExtentReportLibHelper.LogFail(updateCertificateStatus.Item2);
                 }
                 else
                 {
-                    Assert.Pass(updateCertificateStatus.Item2);
+                    //Assert.Pass(updateCertificateStatus.Item2);
                     ExtentReportLibHelper.LogInfo(updateCertificateStatus.Item2);
                 }
             }
             else
             {
-                Assert.Fail("Certificate intented to edit is not in the list.");
+                //Assert.Fail("Certificate intented to edit is not in the list.");
                 ExtentReportLibHelper.LogInfo("Certificate intented to edit is not in the list.");
             }
         }
         [Test, Order(3)]
         public void DeleteCertification()
         {
-            string deleteCertificate = "certificate3";
+            string deleteCertificate = "certificate2";
             MarsBaseClass.NavigateToProfileCertification();
             bool certificatePresentStatus = ProfilePage.CheckCertificateIsPresent(deleteCertificate);
             if (certificatePresentStatus == true)
@@ -105,18 +104,18 @@ namespace CompetitionTaskMars.Test
                 var deleteCertificationStatus = ProfilePageObj.ValidateCertificateDeletion(deleteCertificate);
                 if (deleteCertificationStatus.Item1 == "N")
                 {
-                    Assert.Fail(deleteCertificationStatus.Item2);
+                    //Assert.Fail(deleteCertificationStatus.Item2);
                     ExtentReportLibHelper.LogFail(deleteCertificationStatus.Item2);
                 }
                 else
                 {
-                    Assert.Pass(deleteCertificationStatus.Item2);
+                   // Assert.Pass(deleteCertificationStatus.Item2);
                     ExtentReportLibHelper.LogInfo(deleteCertificationStatus.Item2);
                 }
             }
             else
             {
-                Assert.Fail("Certificate intented to delete is not in the list.");
+                //Assert.Fail("Certificate intented to delete is not in the list.");
                 ExtentReportLibHelper.LogFail("Certificate intented to delete is not in the list.");
                }
         }

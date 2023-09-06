@@ -71,8 +71,8 @@ namespace CompetitionTaskMars.Utility
                     ExtentReportLibHelper.LogPass($"The test has Passed. Message:{testMessage}");
                     break;
             }
-            //ExtentReportLibHelper.LogInfo("End Reporting.");
-            ExtentReportLibHelper.LogScreenShot("End Reporting.","Screenshot:" +ExtentReportLibHelper.GetScreenshot());
+            ExtentReportLibHelper.LogInfo("End Reporting.");
+            //ExtentReportLibHelper.LogScreenShot("End Reporting.","Screenshot:" +ExtentReportLibHelper.GetScreenshot());
         }
         public static string GetScreenshot()
         {

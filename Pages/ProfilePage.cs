@@ -1,6 +1,8 @@
 ﻿using CompetitionTaskMars;
 using CompetitionTaskMars.Utility;
 using DocumentFormat.OpenXml.ExtendedProperties;
+using DocumentFormat.OpenXml.Math;
+using DocumentFormat.OpenXml.Wordprocessing;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using Org.BouncyCastle.Ocsp;
@@ -11,8 +13,6 @@ namespace CompetionTaskMarsAutomation.Pages
 {
     public class ProfilePage : MarsBaseClass
     {
-        
-        private List<CertificateDataList> certificateData;
 
         public (String, String) AddEachEducationData(string country, string university, string title, string degree, string graduationYear)
         {
@@ -24,10 +24,9 @@ namespace CompetionTaskMarsAutomation.Pages
 
             IWebElement educationTable = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table"));
             List<IWebElement> allEducationRow = new List<IWebElement>(educationTable.FindElements(By.TagName("tbody")));
-            
+
             if (allEducationRow.Count > 0)
             {
-                Console.WriteLine($"Table count:{allEducationRow.Count}");
                 List<string> EducationTitleTableList = new List<string>();
                 List<string> EducationDegreeTableList = new List<string>();
 
@@ -41,157 +40,65 @@ namespace CompetionTaskMarsAutomation.Pages
                
                 foreach (var TitleDegree in TitleDegreeTableList)
                 {
-                    Console.WriteLine(TitleDegree.Title + TitleDegree.Degree);
-                    foreach (var education in allEducationRow)
+                    if ((TitleDegree.Title == eduTitle) && (TitleDegree.Degree == eduDegree))
                     {
-                        Console.WriteLine($"Table count:{allEducationRow.Count}");
-
-                        List<IWebElement> tableEducationRow = new List<IWebElement>(education.FindElements(By.TagName("tr")));
-                        var resultRows = education.FindElements(By.TagName("td"));
-                        Console.WriteLine($"resultRows {resultRows}");
-
-                        foreach (var tableEducation in tableEducationRow)
+                        InsertEducationMessage = $"Education({eduTitle}-{eduDegree}) intended to be added is already in the list";
+                        break;
+                    }
+                    else {
+                        foreach (var education in allEducationRow)
                         {
-                            Console.WriteLine($"tableEducation {tableEducation.Text}");
-                            i++;
-                        }
-
-                        TurnOnWait();
-                        var resultCols = education.FindElements(By.TagName("td"));
-                        if ((TitleDegree.Title == eduTitle) && (TitleDegree.Degree == eduDegree))
-                        {
-                            Console.WriteLine($"if--{resultCols[2].Text}=={eduTitle} and  {resultCols[3].Text}=={eduDegree}");
-                            Console.WriteLine("item already present");
-                            InsertEducationMessage = "Education intended to be added is already in the list";
-                            break;
-                        }
-                        else
-                        {
-                            Console.WriteLine($"else--{resultCols[2].Text}!={eduTitle} and  {resultCols[2].Text}!={eduDegree}");
-                            Console.WriteLine("item not present");
+                            List<IWebElement> tableEducationRow = new List<IWebElement>(education.FindElements(By.TagName("td")));
+                            var resultRows = education.FindElements(By.TagName("td"));
                             TurnOnWait();
-                            //driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table/thead/tr/th[6]/div")).Click();
-                            driver.FindElement(By.XPath("/html/body/div[1]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table/thead/tr/th[6]/div")).Click();
-                            EnterEducation(country, university, title, degree, graduationYear);
-                            driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/div/div[3]/div/input[1]")).Click();
+                            var resultCols = education.FindElements(By.TagName("td"));
 
-                            var newEducationStatus = ValidateEducationData(title, degree);
-                            if (newEducationStatus.Item1 == "N")
+                            if ((TitleDegree.Title == eduTitle) && (TitleDegree.Degree == eduDegree))
                             {
-                                InsertEducationMessage = "Addind education is not done";
-                                InsertEducationStatus = "N";
+                                InsertEducationMessage = $"Education({eduTitle}-{eduDegree})  intended to be added is already in the list";
+                                break;
                             }
                             else
                             {
-                                InsertEducationMessage = "Addind education is done";
-                                InsertEducationStatus = "Y";
+                                TurnOnWait();
+                                driver.FindElement(By.XPath("/html/body/div[1]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table/thead/tr/th[6]/div")).Click();
+                                                            
+                                EnterEducation(country, university, title, degree, graduationYear);
+                                driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/div/div[3]/div/input[1]")).Click();
+                                var newEducationStatus = ValidateEducationData(title, degree);
+                                if (newEducationStatus.Item1 == "N")
+                                {
+                                    InsertEducationMessage = $"Adding {title}-{degree} education is not done";
+                                }
+                                else
+                                {
+                                    InsertEducationMessage = $"Adding {title}-{degree} education is done";
+                                    InsertEducationStatus = "Y";
+                                }
+                                break;
                             }
-                            break;
                         }
                     }
                 }
             }
-            else 
+            else
             {
-                Console.WriteLine($"Table count:{allEducationRow.Count}, No data in the table");
                 TurnOnWait();
-                
                 driver.FindElement(By.XPath("/html/body/div[1]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table/thead/tr/th[6]/div")).Click();
-
                 EnterEducation(country, university, title, degree, graduationYear);
                 driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/div/div[3]/div/input[1]")).Click();
 
                 var newEducationStatus = ValidateEducationData(title, degree);
                 if (newEducationStatus.Item1 == "N")
                 {
-                    InsertEducationMessage = "Adding education is not done";
+                    InsertEducationMessage = $"Adding {title}-{degree} education is not done";
                 }
                 else
                 {
-                    InsertEducationMessage = "Adding education is done";
+                    InsertEducationMessage = $"Adding {title}-{degree} education is done";
                     InsertEducationStatus = "Y";
                 }
             }
-
-            /* OLD CODE
-            if (allEducationRow.Count > 0)
-            {
-                String eduDegree = degree;
-                String eduTitle = title;
-                int i = 0;
-                foreach (var education in allEducationRow)
-                {
-                    Console.WriteLine($"Table count:{allEducationRow.Count}");
-
-                    List<IWebElement> tableEducationRow = new List<IWebElement>(education.FindElements(By.TagName("tr")));
-                    var resultRows = education.FindElements(By.TagName("td"));
-                    Console.WriteLine($"resultRows {resultRows}");
-
-                    foreach (var tableEducation in tableEducationRow)
-                    {
-                        Console.WriteLine($"tableEducation {tableEducation.Text}");
-                        i++;
-                    }
-
-                    TurnOnWait();
-                    var resultCols = education.FindElements(By.TagName("td"));
-                    Console.WriteLine($"Title from the table:{resultCols[2].Text}");
-                    if ((resultCols[2].Text == eduTitle) && (resultCols[3].Text == eduDegree))
-                    {
-                        Console.WriteLine($"if--{resultCols[2].Text}=={eduTitle} and  {resultCols[3].Text}=={eduDegree}");
-                        Console.WriteLine("item already present");
-                        InsertEducationMessage = "Education intended to be added is already in the list";
-                        break;
-                    }
-                    else
-                    {
-                        Console.WriteLine($"else--{resultCols[2].Text}!={eduTitle} and  {resultCols[2].Text}!={eduDegree}");
-                        Console.WriteLine("item not present");
-                        TurnOnWait();
-                        //driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table/thead/tr/th[6]/div")).Click();
-                        driver.FindElement(By.XPath("/html/body/div[1]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table/thead/tr/th[6]/div")).Click();
-                        EnterEducation(country, university, title, degree, graduationYear);
-                        driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/div/div[3]/div/input[1]")).Click();
-
-                        var newEducationStatus = ValidateEducationData(title, degree);
-                        if (newEducationStatus.Item1 == "N")
-                        {
-                            InsertEducationMessage = "Addind education is not done";
-                            InsertEducationStatus = "N";
-                        }
-                        else
-                        {
-                            InsertEducationMessage = "Addind education is done";
-                            InsertEducationStatus = "Y";
-                        }
-                        break;
-                    }
-                }
-            }
-            else 
-            {
-                TurnOnWait();
-                Thread.Sleep(2000);
-
-                //driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table/thead/tr/th[6]/div")).Click();
-                driver.FindElement(By.XPath("/html/body/div[1]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table/thead/tr/th[6]/div")).Click();
-
-                EnterEducation(country, university, title, degree, graduationYear);
-                driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/div/div[3]/div/input[1]")).Click();
-
-                var newEducationStatus = ValidateEducationData(title, degree);
-                if (newEducationStatus.Item1 == "N")
-                {
-                    InsertEducationMessage = "Addind education is not done";
-                }
-                else
-                {
-                    InsertEducationMessage = "Addind education is done";
-                    InsertEducationStatus = "Y";
-                }
-            }
-            */
-
             return (InsertStatus: InsertEducationStatus, InsertEducationMessage: InsertEducationMessage);
         }
 
@@ -245,26 +152,25 @@ namespace CompetionTaskMarsAutomation.Pages
                     }
                 }
             }
+            else
+            {
+                validateEducationMessage = "ELSE THE TABLE COUNT IS LESS THAN O";
+                validateEducationStatus = "N";
+
+            }
             return (InsertStatus: validateEducationStatus, InsertMessage: validateEducationMessage);
         }
-        public void EnterEditEducation(string toBeEditTitle,string toBeEditDegree, string editCountry, string editUniversty, string editTitle, string editDegree, string editGradYear)
+        public void EnterEditEducation(string toBeEditTitle, string toBeEditDegree, string editCountry, string editUniversty, string editTitle, string editDegree, string editGradYear)
         {
-            /* IWebElement editButton = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table/tbody[1]/tr/td[6]/span[1]"));
-             editButton.Click();
-             TurnOnWait();
-             EnterEducation(editCountry, editUniversty, editTitle, editDegree, editGradYear);
-             driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table/tbody[1]/tr/td/div[3]/input[1]")).Click();*/
-
-                    String educationUpdationStatus = "";
+            String educationUpdationStatus = "";
             IWebElement educationTable = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table"));
             List<IWebElement> allEducationRow = new List<IWebElement>(educationTable.FindElements(By.TagName("tbody")));
             foreach (var row in allEducationRow)
             {
                 var resultCols = row.FindElements(By.TagName("td"));
 
-                if ((resultCols[2].Text == toBeEditTitle) &&(resultCols[3].Text == toBeEditDegree))
+                if ((resultCols[2].Text == toBeEditTitle) && (resultCols[3].Text == toBeEditDegree))
                 {
-                    Console.WriteLine("can be edited");
                     List<IWebElement> allIconsRow = new List<IWebElement>(row.FindElements(By.TagName("i")));
                     foreach (var icon in allIconsRow)
                     {
@@ -283,7 +189,6 @@ namespace CompetionTaskMarsAutomation.Pages
                 }
                 else
                 {
-                    Console.WriteLine("can not be edited");
                     educationUpdationStatus = "The education intented to update is not in the list";
                 }
             }
@@ -291,7 +196,7 @@ namespace CompetionTaskMarsAutomation.Pages
 
         public static bool CheckEducationIsPresent(string toBeEditTitle, string toBeEditDegree)
         {
-            bool isEducationPresent=false;
+            bool isEducationPresent = false;
             IWebElement educationTable = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table"));
             List<IWebElement> allEducationRow = new List<IWebElement>(educationTable.FindElements(By.TagName("tbody")));
 
@@ -310,7 +215,7 @@ namespace CompetionTaskMarsAutomation.Pages
                 }
             }
             return isEducationPresent;
-        
+
         }
 
         public (String, String) ValidateUpdatedEducation(string updatedCountry, string updatedUniversty, string updatedTitle, string updatedDegree, string updatedGradYear)
@@ -343,15 +248,13 @@ namespace CompetionTaskMarsAutomation.Pages
 
         public void DeleteEducation(string deleteEducationTitle, string deleteEducationDegree)
         {
-            /*IWebElement deleteEducationButton = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table/tbody[1]/tr/td[6]/span[2]/i"));
-            deleteEducationButton.Click();*/
             String educationDeleteStatus = "";
             IWebElement educationTable = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table"));
             List<IWebElement> allEducationRow = new List<IWebElement>(educationTable.FindElements(By.TagName("tbody")));
             foreach (var row in allEducationRow)
             {
                 var resultCols = row.FindElements(By.TagName("td"));
-                if ((resultCols[2].Text == deleteEducationTitle)&&(resultCols[3].Text == deleteEducationDegree))
+                if ((resultCols[2].Text == deleteEducationTitle) && (resultCols[3].Text == deleteEducationDegree))
                 {
                     List<IWebElement> allIconsRow = new List<IWebElement>(row.FindElements(By.TagName("i")));
                     foreach (var icon in allIconsRow)
@@ -386,7 +289,7 @@ namespace CompetionTaskMarsAutomation.Pages
             foreach (var row in allEducationRow)
             {
                 var resultCols = row.FindElements(By.TagName("td"));
-                
+
                 if ((resultCols[2].Text != deleteEducationTitle) && (resultCols[3].Text != deleteEducationDegree))
                 {
                     deletionEducationStatus = "Y";
@@ -404,7 +307,7 @@ namespace CompetionTaskMarsAutomation.Pages
         private void AddCertificateData(string certificate, string from, string year)
         {
             driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/thead/tr/th[4]/div")).Click();
-            EnterCertificate(certificate,from,year);
+            EnterCertificate(certificate, from, year);
             driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/div/div[3]/input[1]")).Click();
         }
 
@@ -421,6 +324,88 @@ namespace CompetionTaskMarsAutomation.Pages
 
             SelectElement selectCertificationYear = new SelectElement(driver.FindElement(By.Name("certificationYear")));
             selectCertificationYear.SelectByText(year);
+        }
+
+        public (String, String) AddEachCertificateData(string certificate, string from, string year)
+        {
+            String InsertCertificateStatus = "N";
+            String InsertCertificateMessage = "";
+            
+            IWebElement certificateTable = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table"));
+            List<IWebElement> allCertificateRow = new List<IWebElement>(certificateTable.FindElements(By.TagName("tbody")));
+
+            if (allCertificateRow.Count > 0)
+            {
+                List<string> CertificateTableList = new List<string>();
+                
+                foreach (var certificateData in allCertificateRow)
+                {
+                    var resultData = certificateData.FindElements(By.TagName("td"));
+                    CertificateTableList.Add(resultData[0].Text);
+                }
+                
+                foreach (var singleCertificate in CertificateTableList)
+                {
+                    if (singleCertificate == certificate)
+                    {
+                        InsertCertificateMessage = $"Certificte({certificate}) intended to be added is already in the list";
+                        break;
+                    }
+                    else
+                    {
+                        foreach (var certification in allCertificateRow)
+                        {
+                            List<IWebElement> tableCertificateRow = new List<IWebElement>(certification.FindElements(By.TagName("td")));
+                            var resultRows = certification.FindElements(By.TagName("td"));
+
+                            if (resultRows[0].Text == certificate)
+                            {
+                                InsertCertificateMessage = $"certificate ({certificate})  intended to be added is already in the list";
+                                break;
+                            }
+                            else
+                            {
+                                TurnOnWait();
+                                driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/thead/tr/th[4]/div")).Click();
+                                EnterCertificate(certificate, from, year);
+                                driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/div/div[3]/input[1]")).Click();
+                                var newCertificateStatus = ValidateCertificateData(certificate,from, year);
+                                if (newCertificateStatus.Item1 == "N")
+                                {
+                                    InsertCertificateMessage = $"Adding {certificate} certificate is not done";
+                                }
+                                else
+                                {
+                                    InsertCertificateMessage = $"Adding {certificate} certificate is done";
+                                    InsertCertificateStatus = "Y";
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+
+                TurnOnWait();
+                driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/thead/tr/th[4]/div")).Click();
+                EnterCertificate(certificate, from, year);
+                driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/div/div[3]/input[1]")).Click();
+                var newCertificateStatus = ValidateCertificateData(certificate, from, year);
+                if (newCertificateStatus.Item1 == "N")
+                {
+                    InsertCertificateMessage = $"Adding {certificate} certificate is not done";
+                }
+                else
+                {
+                    InsertCertificateMessage = $"Adding {certificate} certificate is done";
+                    InsertCertificateStatus = "Y";
+                }
+            }
+            return (InsertCertificateStatus: InsertCertificateStatus, InsertCertificateMessage: InsertCertificateMessage);
+
+
         }
 
         public void GetCertificateData(List<CertificateDataList> certificateData)
@@ -449,7 +434,7 @@ namespace CompetionTaskMarsAutomation.Pages
                 {
                     var resultCols = row.FindElements(By.TagName("td"));
 
-                    if ((resultCols[0].Text == certificateName) )
+                    if ((resultCols[0].Text == certificateName))
                     {
                         newCertificateMessage = "Added to the table";
                         newCertificateStatus = "Y";
@@ -496,25 +481,24 @@ namespace CompetionTaskMarsAutomation.Pages
                 var resultCols = row.FindElements(By.TagName("td"));
                 if ((resultCols[0].Text == certificate))
                 {
-                    List<IWebElement> allIconsRow = new List<IWebElement>(row.FindElements(By.TagName("i")));                     foreach (var icon in allIconsRow)
-                     {
-                         if (icon.GetAttribute("class") == "outline write icon")
-                         {
+                    List<IWebElement> allIconsRow = new List<IWebElement>(row.FindElements(By.TagName("i"))); foreach (var icon in allIconsRow)
+                    {
+                        if (icon.GetAttribute("class") == "outline write icon")
+                        {
                             icon.Click();
                             EnterCertificate(newCertificate, newFrom, newYear);
-                            //driver.FindElement(By.ClassName("ui teal button")).Click();
                             driver.FindElement(By.CssSelector("input[class*='ui teal button']")).Click();
                             educationDeleteStatus = "";
                             break;
                         }
-                         else
-                         {
-                             educationDeleteStatus = "Undefined Error";
-                         }
-                     }
+                        else
+                        {
+                            educationDeleteStatus = "Undefined Error";
+                        }
+                    }
                 }
-                 else
-                 {
+                else
+                {
                     educationDeleteStatus = "The education intented to edit is not in the list";
                 }
             }
@@ -528,7 +512,7 @@ namespace CompetionTaskMarsAutomation.Pages
 
             IWebElement certificateTable = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table"));
             List<IWebElement> allCertificateRow = new List<IWebElement>(certificateTable.FindElements(By.TagName("tbody")));
-          
+
             foreach (var row in allCertificateRow)
             {
                 var resultCols = row.FindElements(By.TagName("td"));
@@ -536,7 +520,7 @@ namespace CompetionTaskMarsAutomation.Pages
                 if ((resultCols[0].Text == newcertificate))
                 {
                     newCertificateStatus = "Y";
-                    newCertificateMessage = "Certificate Updated successfully";break;
+                    newCertificateMessage = "Certificate Updated successfully"; break;
                 }
                 else
                 {
@@ -549,8 +533,6 @@ namespace CompetionTaskMarsAutomation.Pages
 
         public void DeleteCertificate(string deleteCertificate)
         {
-            /*IWebElement deleteEducationButton = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/tbody[1]/tr/td[4]/span[2]/i"));
-            deleteEducationButton.Click();*/
             String certificateDeleteStatus = "";
             IWebElement certificateTable = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table"));
             List<IWebElement> allEducationRow = new List<IWebElement>(certificateTable.FindElements(By.TagName("tbody")));
@@ -598,7 +580,7 @@ namespace CompetionTaskMarsAutomation.Pages
                 {
                     deletionCertificateStatus = "N";
                     deletionCertificateMessage = "Certificate deleted unsuccessfully";
-                    
+
                     break;
                 }
                 else
@@ -610,7 +592,5 @@ namespace CompetionTaskMarsAutomation.Pages
             Console.WriteLine(deletionCertificateMessage);
             return (DeletionStatus: deletionCertificateStatus, DeletionMessage: deletionCertificateMessage);
         }
-
     }
-
-} 
+}

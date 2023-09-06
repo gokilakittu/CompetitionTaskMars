@@ -21,6 +21,10 @@
             public string educationTableTitle { get; set; }
             public string educationTableDegree { get; set; }
         }
+        public class certificateTableData
+        {
+            public string educationTableTitle { get; set; }
+        }
 
     }
 }

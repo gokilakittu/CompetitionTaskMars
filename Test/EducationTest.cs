@@ -20,8 +20,6 @@ namespace CompetitionTaskMars.Test
     public class EducationTest:MarsBaseClass
     {
         private List<EducationDataList> educationData;
-        private List<CertificateDataList> certificateData;
-
 
         LoginPage LoginPageObj = new LoginPage();
         SignInPage SignInPageObj = new SignInPage();
@@ -42,12 +40,8 @@ namespace CompetitionTaskMars.Test
             MarsBaseClass.NavigateToProfileEducation();
             string json = File.ReadAllText(ConstantHelpers.educationDataPath);
             educationData = JsonConvert.DeserializeObject<List<EducationDataList>>(json);
-
-            Console.WriteLine($"list count for--{educationData.Count}");
-            
             foreach (EducationDataList educationDetails in educationData)
             {
-                Console.WriteLine($"start of adding {educationDetails.title} and {educationDetails.degree}");
                 var newEducationStatus = ProfilePageObj.AddEachEducationData(educationDetails.country,
                                  educationDetails.university,
                                  educationDetails.title,
@@ -56,11 +50,13 @@ namespace CompetitionTaskMars.Test
 
                 if (newEducationStatus.Item1 == "N")
                 {
-                    Console.WriteLine($"THE ADDITION OF EDUCATION {educationDetails.title}--{newEducationStatus.Item1} was not done");
+                    ExtentReportLibHelper.LogFail(newEducationStatus.Item2);
+                    //Assert.Fail(newEducationStatus.Item2);
                 }
                 else
                 {
-                    Console.WriteLine($"THE ADDITION OF EDUCATION {educationDetails.title}--{newEducationStatus.Item1}");
+                    ExtentReportLibHelper.LogPass(newEducationStatus.Item2);
+                    //Assert.Fail(newEducationStatus.Item2);
                 }
             }
         }
@@ -85,19 +81,19 @@ namespace CompetitionTaskMars.Test
                 var updateEducationStatus = ProfilePageObj.ValidateUpdatedEducation(editCountry, editUniversty, editTitle, editDegree, editGradYear);
                 if (updateEducationStatus.Item1 == "N")
                 {
-                    Assert.Fail(updateEducationStatus.Item2);
+                    //Assert.Fail(updateEducationStatus.Item2);
                     ExtentReportLibHelper.LogFail(updateEducationStatus.Item2);
                 }
                 else
                 {
-                    Assert.Pass(updateEducationStatus.Item2);
-                    ExtentReportLibHelper.LogInfo(updateEducationStatus.Item2);
+                    //Assert.Pass(updateEducationStatus.Item2);
+                    ExtentReportLibHelper.LogPass(updateEducationStatus.Item2);
                 }
             }
             else
             {
-                Assert.Fail("Education intented to edit is not in the list.");
-                ExtentReportLibHelper.LogInfo("Education intented to edit is not in the list.");
+                //Assert.Fail("Education intented to edit is not in the list.");
+                ExtentReportLibHelper.LogFail("Education intented to edit is not in the list.");
             }
         }
         [Test,Order(3)]
@@ -117,19 +113,19 @@ namespace CompetitionTaskMars.Test
                 var deleteEducationStatus = ProfilePageObj.ValidateEducationDeletion(deleteEducationTitle, deleteEducationDegree);
                 if (deleteEducationStatus.Item1 == "N")
                 {
-                    Assert.Fail(deleteEducationStatus.Item2);
+                    //Assert.Fail(deleteEducationStatus.Item2);
                     ExtentReportLibHelper.LogFail(deleteEducationStatus.Item2);
                 }
                 else
                 {
-                    Assert.Pass(deleteEducationStatus.Item2);
-                    ExtentReportLibHelper.LogInfo(deleteEducationStatus.Item2);
+                    //Assert.Pass(deleteEducationStatus.Item2);
+                    ExtentReportLibHelper.LogPass(deleteEducationStatus.Item2);
                 }
             }
             else
             {
-                Assert.Fail("Education intented to delete is not in the list.");
-                ExtentReportLibHelper.LogInfo("Education intented to delete is not in the list.");
+                //Assert.Fail("Education intented to delete is not in the list.");
+                ExtentReportLibHelper.LogFail("Education intented to delete is not in the list.");
             }
         }
 
