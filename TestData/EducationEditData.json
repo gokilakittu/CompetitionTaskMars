@@ -1,0 +1,18 @@
+﻿[
+  {
+    "country": "India",
+    "university": "MIT",
+    "title": "B.Tech",
+    "degree": "IT",
+    "graduationYear": 1993,
+    "expectedEducationResult": "Pass"
+  },
+  {
+    "country": "India",
+    "university": "Madras institute of technologies",
+    "title": "B.Tech",
+    "degree": "Information Technology",
+    "graduationYear": 2023,
+    "expectedEducationResult": "Pass"
+  }
+]

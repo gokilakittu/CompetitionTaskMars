@@ -4,20 +4,23 @@
     "university": "Auckland University of Technology",
     "title": "B.Sc",
     "degree": "Analytics",
-    "graduationYear": 2015
+    "graduationYear": 2015,
+    "expectedEducationResult": "Pass"
   },
   {
     "country": "India",
     "university": "MIT",
     "title": "B.Tech",
     "degree": "IT",
-    "graduationYear": 2005
+    "graduationYear": 2005,
+    "expectedEducationResult": "Pass"
   },
   {
     "country": "New Zealand",
     "university": "Auckland University of Technology",
     "title": "B.Sc",
-    "degree": "Analytics",
-    "graduationYear": 2015
+    "degree": "Maths",
+    "graduationYear": 2014,
+    "expectedEducationResult": "Pass"
   }
 ]

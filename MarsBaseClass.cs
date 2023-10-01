@@ -1,6 +1,7 @@
 ﻿using CompetitionTaskMars.Utility;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium;
+using NUnit.Framework;
 
 namespace CompetitionTaskMars
 {
@@ -19,6 +20,7 @@ namespace CompetitionTaskMars
             driver = new ChromeDriver();
             TurnOnWait();
             driver.Manage().Window.Maximize();
+            //ExtentReportLibHelper.CreateTest(TestContext.CurrentContext.Test.MethodName);
         }
 
         public static void NavigateUrl()
@@ -36,6 +38,11 @@ namespace CompetitionTaskMars
         {
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(30);
             Thread.Sleep(2000);
+        }
+
+        public static void PageRefresh()
+        {
+            driver.Navigate().Refresh();
         }
 
         //Close the browser

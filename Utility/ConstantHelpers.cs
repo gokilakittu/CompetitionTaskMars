@@ -19,10 +19,13 @@ namespace CompetitionTaskMars.Utility
 
         //loginExcelSheetPath
         public static string educationDataPath = @"C:\\Visual_studio_project\\CompetitionTaskMarsAutomation\\TestData\\EducationData.json";
+        
+        public static string educationEditDataPath = @"C:\\Visual_studio_project\\CompetitionTaskMarsAutomation\\TestData\\EducationEditData.json";
 
         //loginExcelSheetPath
         public static string certificateDataPath = @"C:\\Visual_studio_project\\CompetitionTaskMarsAutomation\\TestData\\CertificateData.json";
-
+        public static string certificateEditDataPath = @"C:\\Visual_studio_project\\CompetitionTaskMarsAutomation\\TestData\\CertificateEditData.json";
+        
         //ExtentReportsPath
         public static string extendReportsPath = @"C:\\Visual_studio_project\\CompetitionTaskMarsAutomation\\TestReport\\";
 
