@@ -1,4 +1,6 @@
-﻿using CompetionTaskMarsAutomation.Utility;
+﻿using AventStack.ExtentReports;
+using AventStack.ExtentReports.Reporter;
+using CompetionTaskMarsAutomation.Utility;
 using CompetitionTaskMars.Pages;
 using CompetitionTaskMars.Utility;
 using MarsQA_1.SpecflowPages.Pages;
@@ -7,26 +9,47 @@ using static CompetionTaskMarsAutomation.Utility.JsonLibHelper;
 
 namespace CompetitionTaskMars.Test
 {
+
+    /*
+     TC_EDU_03- Add education deltails that is already present in the list
+     TC_EDU_05- Check if the user is able to add empty data
+     TC_EDU_06 to TC_EDU_10- User trying to add incomplete education data 
+
+     */
     [TestFixture]
     public class EducationTest:MarsBaseClass
     {
         private LoginPage LoginPageObj;
         private ProfileEducationPage ProfileEducationPageObj;
-        
-        // Constructor for setup
+
+        private ExtentReports extent;
+        private ExtentTest test;
+
+       // Constructor for setup
         public EducationTest()
         {
             // Initialize instances of the classes you want to test
             LoginPageObj = new LoginPage();
             ProfileEducationPageObj = new ProfileEducationPage();
-            
-            //ExtentReportLibHelper.CreateTest(TestContext.CurrentContext.Test.MethodName);
+
+            // Constructor: Initialize ExtentReports and attach an HTML reporter
+            extent = new ExtentReports();
+            var htmlReporter = new ExtentHtmlReporter(ConstantHelpers.extendReportsPath);
+            extent.AttachReporter(htmlReporter);
+ 
             MarsBaseClass.Initialize();
             MarsBaseClass.NavigateUrl();
             LoginPageObj.LoginSteps();
         }
 
-        [Test, Order(1)]
+        [SetUp]
+        public void BeforeTest()
+        {
+            // Create a new test in the report
+            test = extent.CreateTest(TestContext.CurrentContext.Test.Name);
+        }
+        
+        [Test, Order(1), Description("TC_EDU_01- Add valid education details")]
         public void AddEducation()
         {
             TurnOnWait();
@@ -34,19 +57,47 @@ namespace CompetitionTaskMars.Test
             ProfileEducationPageObj.ClearEducationData();
 
             List<EducationData> educationDataList = JsonLibHelper.ReadJsonFile<EducationData>(ConstantHelpers.educationDataPath);
-
+            
             if (educationDataList != null)
             {
                 foreach (var item in educationDataList)
                 {
-                    //Console.WriteLine($"Country: {item.Country}, Title: {item.Title}");
-                   
-                    var newEducationStatus = ProfileEducationPage.AddEachEducationData(item);
-
-                    Assert.AreEqual(item.ExpectedEducationResult, newEducationStatus, $"Education data for {item.Title}-{item.Degree} was added successfully!");
-                    
+                    var newEducationStatus = ProfileEducationPageObj.AddEachEducationData(item);
+                    test.Info($"Education insertion status:{newEducationStatus.returnStatus} - Education insertion message: {newEducationStatus.returnMessage}");
+                    Assert.AreEqual(item.ExpectedEducationResult, newEducationStatus.returnStatus);
                 }
-                //Assert.Inconclusive("Test is marked as inconclusive.");
+                
+            }
+            else
+            {
+                Assert.Fail("Error in reading the JSON data.");
+            }
+        }
+        [Test, Order(2), Description("TC_EDU_0-3Verify if user is able to  add  education that is already in the education list in Profile - education")]
+        public void AddEducationWithDuplicateData()
+        {
+            TurnOnWait();
+            MarsBaseClass.NavigateToProfileEducation();
+            ProfileEducationPageObj.ClearEducationData();
+
+            List<EducationData> educationDataList = JsonLibHelper.ReadJsonFile<EducationData>(ConstantHelpers.educationDataDuplicatePath);
+            if (educationDataList != null)
+            {
+                foreach (var item in educationDataList)
+                {
+                    var newEducationStatus = ProfileEducationPageObj.AddEachEducationData(item);
+                    if (newEducationStatus.returnStatus == "Fail")
+                    {
+                        test.Info("Test is marked as inconclusive.");
+                        test.Fail($"Education insertion status:{newEducationStatus.returnStatus} - Education insertion message: {newEducationStatus.returnMessage}");
+                        Assert.Inconclusive("Test is marked as inconclusive.");
+                    }
+                    else
+                    {
+                        test.Info($"Education insertion status:{newEducationStatus.returnStatus} - Education insertion message: {newEducationStatus.returnMessage}");
+
+                    }
+                }
             }
             else
             {
@@ -54,7 +105,7 @@ namespace CompetitionTaskMars.Test
             }
         }
 
-        [Test, Order(2)]
+        [Test, Order(3), Description("TC_EDU_02- Add and then edit valid education details")]
         public void EditEducation()
         {
             TurnOnWait();
@@ -70,13 +121,14 @@ namespace CompetitionTaskMars.Test
                     if (item.Equals(last))
                     {
                         var editEducationStatus = ProfileEducationPageObj.EnterEditEducation(item);
-                        //Assert.AreEqual(item.ExpectedResult, editEducationStatus, $"Education data for {item.Title}-{item.Degree} was updated successfully!");
+                        test.Info("The education was edited");
+                        Assert.AreEqual(item.ExpectedEducationResult, editEducationStatus.returnStatus);
                     }
                     else
                     {
                         ProfileEducationPageObj.ClearEducationData();
-                        var newEducationStatus = ProfileEducationPage.AddEachEducationData(item);
-                        //Assert.AreEqual(item.ExpectedResult, newEducationStatus, $"Education data for {item.Title}-{item.Degree} was updated successfully!");
+                        var newEducationStatus = ProfileEducationPageObj.AddEachEducationData(item);
+                        test.Info("The education intended to delete was added");
                     }
                 }
             }
@@ -87,30 +139,23 @@ namespace CompetitionTaskMars.Test
         }
 
 
-        [Test,Order(3)]
+        [Test,Order(4), Description("TC_EDU_04 - Add and then delete education details")]
         public void DeleteEducation()
         {
             TurnOnWait();
             MarsBaseClass.NavigateToProfileEducation();
-            List<EducationData> educationDataList = JsonLibHelper.ReadJsonFile<EducationData>(ConstantHelpers.educationEditDataPath);
+            List<EducationData> educationDataList = JsonLibHelper.ReadJsonFile<EducationData>(ConstantHelpers.educationDeleteDataPath);
 
             if (educationDataList != null)
             {
-                var last = educationDataList.Last();
-
                 foreach (var item in educationDataList)
                 {
-                    if (item.Equals(last))
-                    {
-                        var deleteEducationStatus = ProfileEducationPageObj.DeleteEducation(item);
-                        //Assert.AreEqual(item.ExpectedResult, editEducationStatus, $"Education data for {item.Title}-{item.Degree} was updated successfully!");
-                    }
-                    else
-                    {
-                        ProfileEducationPageObj.ClearEducationData();
-                        var newEducationStatus = ProfileEducationPage.AddEachEducationData(item);
-                        //Assert.AreEqual(item.ExpectedResult, newEducationStatus, $"Education data for {item.Title}-{item.Degree} was updated successfully!");
-                    }
+                    ProfileEducationPageObj.ClearEducationData();
+                    var newEducationStatus = ProfileEducationPageObj.AddEachEducationData(item);
+                    test.Info("The education intended to delete was added");
+                    var deleteEducationStatus = ProfileEducationPageObj.DeleteEducation(item);
+                    test.Info("The education was deleted");
+                    Assert.AreEqual(item.ExpectedEducationResult, deleteEducationStatus.returnStatus);
                 }
             }
             else
@@ -120,10 +165,17 @@ namespace CompetitionTaskMars.Test
         }
         
         [TearDown]
+        public void AfterTest()
+        {
+            // End the test and add it to the report
+            extent.Flush();
+        }
+
+        [OneTimeTearDown]
         public void TearDown()
         {
-            //ExtentReportLibHelper.EndTest();
-           // ExtentReportLibHelper.EndReporting();
+            // End the test and save the report
+            extent.Flush();
             MarsBaseClass.CleanUp();
         }
     }

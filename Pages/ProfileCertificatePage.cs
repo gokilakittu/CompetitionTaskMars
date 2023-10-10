@@ -54,13 +54,11 @@ namespace CompetitionTaskMars.Test
         public JsonLibHelper.ReturnObjContainer AddEachCertificateData(JsonLibHelper.CertificateData item)
         {
             if (IsDataVisibleInTableRow(item.Certificate) == true) {
-                Console.WriteLine("Fail");
                 ReturnStatus = "Fail";
                 ReturnMessage = $"The certification {item.Certificate} which was intented to added was already present in the list";
                 //Assert.Fail($"The certification {item.Certificate} intended to add is already in the list");
             }
             else {
-                Console.WriteLine("Pass");
                 driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/thead/tr/th[4]/div")).Click();
                 EnterCertificate(item);
                 driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/div/div[3]/input[1]")).Click();
@@ -96,10 +94,13 @@ namespace CompetitionTaskMars.Test
             return new ReturnObjContainer(ReturnStatus, ReturnMessage);
         }
 
-        public object DeleteEducation(JsonLibHelper.CertificateData item)
+        public JsonLibHelper.ReturnObjContainer DeleteCertificate(JsonLibHelper.CertificateData item)
         {
             driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/tbody/tr/td[4]/span[2]/i")).Click();
-            return "Pass";
+            ReturnStatus = "Pass";
+            ReturnMessage = $"The certification {item.Certificate}  was deleted successfully.";
+            return new ReturnObjContainer(ReturnStatus, ReturnMessage);
+            
         }
     }
 

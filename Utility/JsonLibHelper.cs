@@ -26,7 +26,6 @@ namespace CompetionTaskMarsAutomation.Utility
             {
                 Console.WriteLine("File not found: " + filePath);
             }
-
             return dataList;
         }
 
@@ -52,11 +51,17 @@ namespace CompetionTaskMarsAutomation.Utility
         {
             public object returnStatus;
             public object returnMessage;
+            
+            public object isItEmpty;
 
             public ReturnObjContainer(object returnStatus, object returnMessage)
             {
                 this.returnStatus = returnStatus;
                 this.returnMessage = returnMessage;
+            }
+            public ReturnObjContainer(object isItEmpty)
+            {
+                this.isItEmpty = isItEmpty;
             }
         }
     }
