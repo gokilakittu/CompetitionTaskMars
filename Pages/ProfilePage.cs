@@ -232,14 +232,12 @@ namespace CompetionTaskMarsAutomation.Pages
 
                 if ((resultCols[2].Text == updatedTitle) && (resultCols[3].Text == updatedDegree))
                 {
-                    Console.WriteLine("Okay");
                     updateEducationStatus = "Y";
                     updateEducationMessage = "Education Updated successfully";
                     break;
                 }
                 else
                 {
-                    Console.WriteLine("not Okay");
                     updateEducationMessage = "Education Updation failed";
                 }
             }
@@ -408,13 +406,13 @@ namespace CompetionTaskMarsAutomation.Pages
 
         }
 
-        public void GetCertificateData(List<CertificateDataList> certificateData)
+        public void GetCertificateData(List<CertificateData> certificateData)
         {
-            foreach (CertificateDataList certificateDetails in certificateData)
+            foreach (CertificateData certificateDetails in certificateData)
             {
-                AddCertificateData(certificateDetails.certificate,
-                                  certificateDetails.from,
-                                  certificateDetails.year);
+                AddCertificateData(certificateDetails.Certificate,
+                                  certificateDetails.From,
+                                  certificateDetails.Year);
             }
         }
 
@@ -459,7 +457,7 @@ namespace CompetionTaskMarsAutomation.Pages
             foreach (var row in allCertificateRow)
             {
                 var resultCols = row.FindElements(By.TagName("td"));
-                if ((resultCols[0].Text == certificatePresent))
+                if (resultCols[0].Text == certificatePresent)
                 {
                     isCertificatePresent = true;
                     break;

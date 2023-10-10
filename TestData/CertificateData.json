@@ -1,17 +1,26 @@
 ﻿[
   {
-    "certificate": "certificate2",
-    "from": "The University of Auckland",
-    "year": "2011"
-  },
-  {
     "certificate": "certificate1",
-    "from": "Madras institute of technologies",
-    "year": "2010"
+    "from": "The University of Auckland",
+    "year": "2011",
+    "expectedCertificateResult": "Pass"
   },
   {
     "certificate": "certificate2",
-    "from": "The University of Auckland",
-    "year": "2011"
+    "from": "Madras institute of technologies",
+    "year": "2010",
+    "expectedCertificateResult": "Pass"
+  },
+  {
+    "certificate": "certificate3",
+    "from": "UNI",
+    "year": "2012",
+    "expectedCertificateResult": "Pass"
+  },
+  {
+    "certificate": "certificate4",
+    "from": "University of sydney",
+    "year": "2014",
+    "expectedCertificateResult": "Pass"
   }
 ]
