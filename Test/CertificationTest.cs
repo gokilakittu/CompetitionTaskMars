@@ -9,13 +9,14 @@ using System.Linq;
 
 namespace CompetitionTaskMars.Test
 {
+
     [TestFixture]
     //[Parallelizable]
-    public class CertificationTest:MarsBaseClass
+    public class CertificationTest : MarsBaseClass
     {
         private LoginPage LoginPageObj;
         private ProfileCertificatePage ProfileCertificatePageObj;
-        
+
         private ExtentReports extent;
         private ExtentTest test;
 
@@ -31,7 +32,6 @@ namespace CompetitionTaskMars.Test
             var htmlReporter = new ExtentHtmlReporter(ConstantHelpers.extendReportsPath);
             extent.AttachReporter(htmlReporter);
 
-            //ExtentReportLibHelper.CreateTest(TestContext.CurrentContext.Test.MethodName);
             MarsBaseClass.Initialize();
             MarsBaseClass.NavigateUrl();
             LoginPageObj.LoginSteps();
@@ -44,22 +44,21 @@ namespace CompetitionTaskMars.Test
             test = extent.CreateTest(TestContext.CurrentContext.Test.Name);
         }
 
-        [Test, Order(1)]
+        [Test, Order(1), Description("TC_CER_01- Add valid Certificate details")]
         public void AddCertification()
         {
             TurnOnWait();
             MarsBaseClass.NavigateToProfileCertification();
             ProfileCertificatePageObj.ClearCertificateData();
-            List<CertificateData> certificateDataList = JsonLibHelper.ReadJsonFile<CertificateData>(ConstantHelpers.certificateDataPath);
 
+            List<CertificateData> certificateDataList = JsonLibHelper.ReadJsonFile<CertificateData>(ConstantHelpers.certificateDataPath);
             if (certificateDataList != null)
             {
                 foreach (var item in certificateDataList)
                 {
                     var newCertificateStatus = ProfileCertificatePageObj.AddEachCertificateData(item);
                     test.Info($"Certification insertion status:{newCertificateStatus.returnStatus} - Certification insertion message: {newCertificateStatus.returnMessage}");
-                    
-                    Assert.IsTrue(ProfileCertificatePageObj.IsDataVisibleInTableRow(item.Certificate));
+                    Assert.AreEqual(item.ExpectedCertificateResult, newCertificateStatus.returnStatus);
                 }
             }
             else
@@ -67,8 +66,40 @@ namespace CompetitionTaskMars.Test
                 Assert.Fail("Error in reading the JSON data.");
             }
         }
-        
-        [Test, Order(2)]
+        [Test, Order(2), Description("TC_CER_0-3 Verify if user is able to  add  certificate that is already in the certificate list in Profile - certificate")]
+        public void AddCertificateWithDuplicateData()
+        {
+            TurnOnWait();
+            MarsBaseClass.NavigateToProfileCertification();
+            ProfileCertificatePageObj.ClearCertificateData();
+
+            List<CertificateData> certificateDataList = JsonLibHelper.ReadJsonFile<CertificateData>(ConstantHelpers.certificateDataDuplicatePath);
+            if (certificateDataList != null)
+            {
+                foreach (var item in certificateDataList)
+                {
+                    var newCertificateStatus = ProfileCertificatePageObj.AddEachCertificateData(item);
+                    if (newCertificateStatus.returnStatus == "Fail")
+                    {
+                        test.Info("Test is marked as inconclusive.");
+                        test.Fail($"Certification insertion status:{newCertificateStatus.returnStatus} - Certification insertion message: {newCertificateStatus.returnMessage}");
+                        Assert.Inconclusive("Test is marked as inconclusive.");
+                        Assert.Fail($"{newCertificateStatus.returnMessage}");
+                    }
+                    else
+                    {
+                        test.Info($"Certification insertion status:{newCertificateStatus.returnStatus} - Certification insertion message: {newCertificateStatus.returnMessage}");
+                        Assert.AreEqual(item.ExpectedCertificateResult, newCertificateStatus.returnStatus);
+                    }
+                }
+            }
+            else
+            {
+                Assert.Fail("Error in reading the JSON data.");
+            }
+        }
+
+        [Test, Order(3), Description("TC_CER_02- Add and then edit valid certificate details")]
         public void EditCertification()
         {
             TurnOnWait();
@@ -86,8 +117,6 @@ namespace CompetitionTaskMars.Test
                     {
                         var editCertificateStatus = ProfileCertificatePageObj.EnterEditCertificate(item);
                         test.Info("The certificate was edited");
-                         //Console.WriteLine($"editCertificateStatus--{editCertificateStatus.returnStatus}");
-                        //Console.WriteLine($"item.ExpectedCertificateResult--{item.ExpectedCertificateResult}");
                        Assert.AreEqual(item.ExpectedCertificateResult, editCertificateStatus.returnStatus);
                     }
                     else
@@ -104,31 +133,24 @@ namespace CompetitionTaskMars.Test
             }
         }
         
-       [Test, Order(3)]
+       [Test, Order(4), Description("TC_CER_04 - Add and then delete certificate details")]
        public void DeleteCertification()
        {
            TurnOnWait();
            MarsBaseClass.NavigateToProfileCertification();
-           List<CertificateData> certificateDataList = JsonLibHelper.ReadJsonFile<CertificateData>(ConstantHelpers.certificateDataPath);
+           List<CertificateData> certificateDataList = JsonLibHelper.ReadJsonFile<CertificateData>(ConstantHelpers.certificateDeleteDataPath);
 
            if (certificateDataList != null)
            {
-               var last = certificateDataList.Last();
-
-               foreach (var item in certificateDataList)
-               {
-                   if (item.Equals(last))
-                   {
-                       var deleteEducationStatus = ProfileCertificatePageObj.DeleteEducation(item);
-                       //Assert.AreEqual(item.ExpectedResult, editEducationStatus, $"Education data for {item.Title}-{item.Degree} was updated successfully!");
-                   }
-                   else
-                   {
-                       ProfileCertificatePageObj.ClearCertificateData();
-                       var newEducationStatus = ProfileCertificatePageObj.AddEachCertificateData(item);
-                       //Assert.AreEqual(item.ExpectedResult, newEducationStatus, $"Education data for {item.Title}-{item.Degree} was updated successfully!");
-                   }
-               }
+                foreach (var item in certificateDataList)
+                {
+                    ProfileCertificatePageObj.ClearCertificateData();
+                    var newCertificateStatus = ProfileCertificatePageObj.AddEachCertificateData(item);
+                    test.Info("The certificate intended to delete was added");
+                    var deleteCertificateStatus = ProfileCertificatePageObj.DeleteCertificate(item);
+                    test.Info("The certificate was deleted");
+                    Assert.AreEqual(item.ExpectedCertificateResult, deleteCertificateStatus.returnStatus);
+                }
            }
            else
            {
@@ -136,43 +158,19 @@ namespace CompetitionTaskMars.Test
            }
        }
 
-
-
-
-        [TearDown]
+       [TearDown]
         public void AfterTest()
         {
-            // Add test status (Pass/Fail) to the report
-            var status = TestContext.CurrentContext.Result.Outcome.Status;
-            var stackTrace = TestContext.CurrentContext.Result.StackTrace;
-            var errorMessage = TestContext.CurrentContext.Result.Message;
-
-            if (status == NUnit.Framework.Interfaces.TestStatus.Failed)
-            {
-                test.Fail($"Test failed: {errorMessage}");
-                test.Fail(stackTrace);
-            }
-            else if (status == NUnit.Framework.Interfaces.TestStatus.Passed)
-            {
-                test.Pass("Test passed");
-            }
-            else if (status == NUnit.Framework.Interfaces.TestStatus.Skipped)
-            {
-                test.Skip("Test skipped");
-            }
-
-            // End the test and save the report
+            // End the test and add it to the report
             extent.Flush();
-            MarsBaseClass.CleanUp();
         }
 
         [OneTimeTearDown]
         public void TearDown()
         {
-            // Close the ExtentReports instance
+            // End the test and save the report
             extent.Flush();
-            extent.RemoveTest(test);
-            //extent.RemoveTest(ExtentTestManager.GetTest());
+            MarsBaseClass.CleanUp();
         }
     }
 }

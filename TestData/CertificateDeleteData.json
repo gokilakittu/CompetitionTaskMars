@@ -1,0 +1,8 @@
+﻿[
+  {
+    "certificate": "certificate intended to delete",
+    "from": "certificate from",
+    "year": "2011",
+    "expectedCertificateResult": "Pass"
+  }
+]
