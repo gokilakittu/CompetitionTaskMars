@@ -37,7 +37,7 @@ namespace CompetionTaskMarsAutomation.Pages
                     EducationDegreeTableList.Add(resultData[3].Text);
                 }
                 var TitleDegreeTableList = EducationTitleTableList.Zip(EducationDegreeTableList, (T, D) => new { Title = T, Degree = D });
-               
+
                 foreach (var TitleDegree in TitleDegreeTableList)
                 {
                     if ((TitleDegree.Title == eduTitle) && (TitleDegree.Degree == eduDegree))
@@ -45,7 +45,8 @@ namespace CompetionTaskMarsAutomation.Pages
                         InsertEducationMessage = $"Education({eduTitle}-{eduDegree}) intended to be added is already in the list";
                         break;
                     }
-                    else {
+                    else
+                    {
                         foreach (var education in allEducationRow)
                         {
                             List<IWebElement> tableEducationRow = new List<IWebElement>(education.FindElements(By.TagName("td")));
@@ -62,7 +63,7 @@ namespace CompetionTaskMarsAutomation.Pages
                             {
                                 TurnOnWait();
                                 driver.FindElement(By.XPath("/html/body/div[1]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/table/thead/tr/th[6]/div")).Click();
-                                                            
+
                                 EnterEducation(country, university, title, degree, graduationYear);
                                 driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[4]/div/div[2]/div/div/div[3]/div/input[1]")).Click();
                                 var newEducationStatus = ValidateEducationData(title, degree);
@@ -328,20 +329,20 @@ namespace CompetionTaskMarsAutomation.Pages
         {
             String InsertCertificateStatus = "N";
             String InsertCertificateMessage = "";
-            
+
             IWebElement certificateTable = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table"));
             List<IWebElement> allCertificateRow = new List<IWebElement>(certificateTable.FindElements(By.TagName("tbody")));
 
             if (allCertificateRow.Count > 0)
             {
                 List<string> CertificateTableList = new List<string>();
-                
+
                 foreach (var certificateData in allCertificateRow)
                 {
                     var resultData = certificateData.FindElements(By.TagName("td"));
                     CertificateTableList.Add(resultData[0].Text);
                 }
-                
+
                 foreach (var singleCertificate in CertificateTableList)
                 {
                     if (singleCertificate == certificate)
@@ -367,7 +368,7 @@ namespace CompetionTaskMarsAutomation.Pages
                                 driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/thead/tr/th[4]/div")).Click();
                                 EnterCertificate(certificate, from, year);
                                 driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/div/div[3]/input[1]")).Click();
-                                var newCertificateStatus = ValidateCertificateData(certificate,from, year);
+                                var newCertificateStatus = ValidateCertificateData(certificate, from, year);
                                 if (newCertificateStatus.Item1 == "N")
                                 {
                                     InsertCertificateMessage = $"Adding {certificate} certificate is not done";

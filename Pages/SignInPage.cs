@@ -3,10 +3,7 @@ using OpenQA.Selenium;
 
 namespace CompetionTaskMarsAutomation.Pages
 {
-    public class SignInPage:MarsBaseClass
+    public class SignInPage : MarsBaseClass
     {
-      
-
-
     }
 }

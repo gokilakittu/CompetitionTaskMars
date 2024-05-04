@@ -1,30 +1,43 @@
-﻿using CompetitionTaskMars;
+﻿using CompetionTaskMarsAutomation.Utility;
+using CompetitionTaskMars;
+using Newtonsoft.Json;
 using OpenQA.Selenium;
 
 namespace MarsQA_1.SpecflowPages.Pages
 {
-    public class LoginPage: MarsBaseClass
+    public class LoginPage : MarsBaseClass
     {
-        //ExcelLibHelper excelObj = new ExcelLibHelper();
+        private readonly IWebDriver driver;
+
+        public LoginPage(IWebDriver driver)
+        {
+            this.driver = driver;
+        }
+
+        IWebElement signinLink => driver.FindElement(By.XPath("//A[@class='item'][text()='Sign In']"));
+        IWebElement emailTxt => driver.FindElement(By.XPath("(//INPUT[@type='text'])[2]"));
+        IWebElement passwordTxt => driver.FindElement(By.XPath("//INPUT[@type='password']"));
+        IWebElement loginBtn => driver.FindElement(By.XPath("//BUTTON[@class='fluid ui teal button'][text()='Login']"));
+        IWebElement currentUser => driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/div[1]/div[2]/div/span"));
+
+
+        ExcelLibHelper excelObj = new ExcelLibHelper();
         public void LoginSteps()
         {
-            NavigateUrl();
-            /*string jsonResponse = excelObj.ReadExcel();
+            string jsonResponse = excelObj.ReadExcel();
             dynamic responseObj = JsonConvert.DeserializeObject(jsonResponse);
-            string uName = responseObj[0].UserName;
-            string uPassword = responseObj[0].Password;*/
-            string uName = "testdata@gmail.com";
-            string uPassword = "123123";
-            driver.FindElement(By.XPath("//A[@class='item'][text()='Sign In']")).Click();
-            driver.FindElement(By.XPath("(//INPUT[@type='text'])[2]")).SendKeys(uName);
-            driver.FindElement(By.XPath("//INPUT[@type='password']")).SendKeys(uPassword);
-            driver.FindElement(By.XPath("//BUTTON[@class='fluid ui teal button'][text()='Login']")).Click();
+            string usernameExcel = responseObj[0].UserName;
+            string passExcel = responseObj[0].Password;
+
+            signinLink.Click();
+            emailTxt.SendKeys(usernameExcel);
+            passwordTxt.SendKeys(passExcel);
+            loginBtn.Submit();
         }
         public bool ConfirmUser()
         {
             bool ValidateAvailability = false;
             TurnOnWait();
-            IWebElement currentUser = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/div[1]/div[2]/div/span"));
             if (currentUser.Text != null)
             {
                 ValidateAvailability = true;
