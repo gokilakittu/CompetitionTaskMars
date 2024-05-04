@@ -1,10 +1,13 @@
-﻿using AventStack.ExtentReports;
-using AventStack.ExtentReports.Reporter;
+﻿
+using AventStack.ExtentReports;
 using CompetionTaskMarsAutomation.Utility;
 using CompetitionTaskMars.Pages;
 using CompetitionTaskMars.Utility;
 using MarsQA_1.SpecflowPages.Pages;
 using NUnit.Framework;
+using NUnit.Framework.Interfaces;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 using static CompetionTaskMarsAutomation.Utility.JsonLibHelper;
 
 namespace CompetitionTaskMars.Test
@@ -14,31 +17,26 @@ namespace CompetitionTaskMars.Test
      TC_EDU_03- Add education deltails that is already present in the list
      TC_EDU_05- Check if the user is able to add empty data
      TC_EDU_06 to TC_EDU_10- User trying to add incomplete education data 
+    */
 
-     */
     [TestFixture]
-    public class EducationTest:MarsBaseClass
+    public class EducationTest : MarsBaseClass
     {
+        private WebDriver driver;
+
         private LoginPage LoginPageObj;
         private ProfileEducationPage ProfileEducationPageObj;
 
-        private ExtentReports extent;
-        private ExtentTest test;
-
-       // Constructor for setup
+        // Constructor for setup
         public EducationTest()
         {
-            // Initialize instances of the classes you want to test
-            LoginPageObj = new LoginPage();
-            ProfileEducationPageObj = new ProfileEducationPage();
+            InitializeReport();
+            Initialize();
+            NavigateUrl();
 
-            // Constructor: Initialize ExtentReports and attach an HTML reporter
-            extent = new ExtentReports();
-            var htmlReporter = new ExtentHtmlReporter(ConstantHelpers.extendReportsPath);
-            extent.AttachReporter(htmlReporter);
- 
-            MarsBaseClass.Initialize();
-            MarsBaseClass.NavigateUrl();
+            // Initialize instances of the classes you want to test
+            LoginPageObj = new LoginPage(MarsBaseClass.driver);
+            ProfileEducationPageObj = new ProfileEducationPage(MarsBaseClass.driver);
             LoginPageObj.LoginSteps();
         }
 
@@ -47,8 +45,9 @@ namespace CompetitionTaskMars.Test
         {
             // Create a new test in the report
             test = extent.CreateTest(TestContext.CurrentContext.Test.Name);
+            test.Info($"The test name :{TestContext.CurrentContext.Test.Name}");
         }
-        
+
         [Test, Order(1), Description("TC_EDU_01- Add valid education details")]
         public void AddEducation()
         {
@@ -57,7 +56,7 @@ namespace CompetitionTaskMars.Test
             ProfileEducationPageObj.ClearEducationData();
 
             List<EducationData> educationDataList = JsonLibHelper.ReadJsonFile<EducationData>(ConstantHelpers.educationDataPath);
-            
+
             if (educationDataList != null)
             {
                 foreach (var item in educationDataList)
@@ -66,14 +65,16 @@ namespace CompetitionTaskMars.Test
                     test.Info($"Education insertion status:{newEducationStatus.returnStatus} - Education insertion message: {newEducationStatus.returnMessage}");
                     Assert.AreEqual(item.ExpectedEducationResult, newEducationStatus.returnStatus);
                 }
-                
+
             }
             else
             {
                 Assert.Fail("Error in reading the JSON data.");
             }
         }
-        [Test, Order(2), Description("TC_EDU_0-3Verify if user is able to  add  education that is already in the education list in Profile - education")]
+
+        [Test, Order(2), Description("TC_EDU_0-3 Verify if user is able to  add  education that is already in the education list in Profile - education")]
+        //[Ignore("Ignore AddEducation With DuplicateData")]
         public void AddEducationWithDuplicateData()
         {
             TurnOnWait();
@@ -90,12 +91,14 @@ namespace CompetitionTaskMars.Test
                     {
                         test.Info("Test is marked as inconclusive.");
                         test.Fail($"Education insertion status:{newEducationStatus.returnStatus} - Education insertion message: {newEducationStatus.returnMessage}");
-                        Assert.Inconclusive("Test is marked as inconclusive.");
+                        //Assert.Inconclusive("Test is marked as inconclusive.");
+                        Assert.That(newEducationStatus.returnStatus, Is.EqualTo(item.ExpectedEducationResult));
+
                     }
                     else
                     {
                         test.Info($"Education insertion status:{newEducationStatus.returnStatus} - Education insertion message: {newEducationStatus.returnMessage}");
-
+                        Assert.AreEqual(item.ExpectedEducationResult, actual: newEducationStatus.returnStatus);
                     }
                 }
             }
@@ -122,13 +125,14 @@ namespace CompetitionTaskMars.Test
                     {
                         var editEducationStatus = ProfileEducationPageObj.EnterEditEducation(item);
                         test.Info("The education was edited");
+                        test.Info($"{editEducationStatus.returnMessage}");
                         Assert.AreEqual(item.ExpectedEducationResult, editEducationStatus.returnStatus);
                     }
                     else
                     {
                         ProfileEducationPageObj.ClearEducationData();
                         var newEducationStatus = ProfileEducationPageObj.AddEachEducationData(item);
-                        test.Info("The education intended to delete was added");
+                        test.Info("The education intended to edit was added");
                     }
                 }
             }
@@ -139,7 +143,7 @@ namespace CompetitionTaskMars.Test
         }
 
 
-        [Test,Order(4), Description("TC_EDU_04 - Add and then delete education details")]
+        [Test, Order(4), Description("TC_EDU_04 - Add and then delete education details")]
         public void DeleteEducation()
         {
             TurnOnWait();
@@ -163,12 +167,34 @@ namespace CompetitionTaskMars.Test
                 Assert.Fail("Error in reading the JSON data.");
             }
         }
-        
+
         [TearDown]
         public void AfterTest()
         {
             // End the test and add it to the report
-            extent.Flush();
+            var status = TestContext.CurrentContext.Result.Outcome.Status;
+            var stackTrace = string.IsNullOrEmpty(TestContext.CurrentContext.Result.StackTrace)
+                    ? ""
+                    : string.Format("<pre>{0}</pre>", TestContext.CurrentContext.Result.StackTrace);
+            Status logstatus;
+
+            switch (status)
+            {
+                case TestStatus.Failed:
+                    logstatus = Status.Fail;
+                    break;
+                case TestStatus.Inconclusive:
+                    logstatus = Status.Warning;
+                    break;
+                case TestStatus.Skipped:
+                    logstatus = Status.Skip;
+                    break;
+                default:
+                    logstatus = Status.Pass;
+                    break;
+            }
+
+            test.Log(logstatus, "Test ended with " + logstatus + stackTrace);
         }
 
         [OneTimeTearDown]

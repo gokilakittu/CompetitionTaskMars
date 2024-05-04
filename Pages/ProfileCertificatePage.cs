@@ -6,33 +6,44 @@ using OpenQA.Selenium.Support.UI;
 using Org.BouncyCastle.Tls;
 using static CompetionTaskMarsAutomation.Utility.JsonLibHelper;
 
-namespace CompetitionTaskMars.Test
+namespace CompetitionTaskMars.Pages
 {
     public class ProfileCertificatePage : MarsBaseClass
     {
         public object ReturnStatus { get; private set; }
         public object ReturnMessage { get; private set; }
+        public IWebDriver driver { get; }
 
-        
-        public ProfileCertificatePage()
+        public ProfileCertificatePage(IWebDriver driver)
         {
+            this.driver = driver;
         }
+
+        IWebElement certificateTable => driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table"));
+        IWebElement deleteCertBtn => driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/tbody/tr/td[4]/span[2]/i"));
+        IWebElement addNewCertBtn => driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/thead/tr/th[4]/div"));
+        IWebElement addCertItemBtn => driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/div/div[3]/input[1]"));
+        IWebElement certNameTxt => driver.FindElement(By.Name("certificationName"));
+        IWebElement certFromTxt => driver.FindElement(By.Name("certificationFrom"));
+        SelectElement certYearSel => new SelectElement(driver.FindElement(By.Name("certificationYear")));
+        IWebElement editCertBtn => driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/tbody[1]/tr/td[4]/span[1]/i"));
+        IWebElement updateCertBtn => driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/tbody/tr/td/div/span/input[1]"));
+        IWebElement certSuccessMessage => driver.FindElement(By.ClassName("ns-type-success"));
+        IWebElement certErrorMessage => driver.FindElement(By.ClassName("ns-type-error"));
 
         public void ClearCertificateData()
         {
-            IWebElement certificateTable = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table"));
 
             List<IWebElement> allCertificateRow = new List<IWebElement>(certificateTable.FindElements(By.TagName("tbody")));
 
             for (int i = 1; i <= allCertificateRow.Count(); i++)
             {
-                driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/tbody/tr/td[4]/span[2]/i")).Click();
+                deleteCertBtn.Click();
                 TurnOnWait();
             }
         }
         public bool IsDataVisibleInTableRow(string visibleCertificate)
         {
-            IWebElement certificateTable = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table"));
 
             IReadOnlyCollection<IWebElement> tableRows = certificateTable.FindElements(By.TagName("tbody"));
 
@@ -53,81 +64,96 @@ namespace CompetitionTaskMars.Test
 
         public JsonLibHelper.ReturnObjContainer AddEachCertificateData(JsonLibHelper.CertificateData item)
         {
-            if (IsDataVisibleInTableRow(item.Certificate) == true) {
+            if (IsDataVisibleInTableRow(item.Certificate) == true)
+            {
                 ReturnStatus = "Fail";
                 ReturnMessage = $"The certification {item.Certificate} which was intented to added was already present in the list";
-                //Assert.Fail($"The certification {item.Certificate} intended to add is already in the list");
             }
-            else {
-                driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/thead/tr/th[4]/div")).Click();
+            else
+            {
+                addNewCertBtn.Click();
                 EnterCertificate(item);
-                driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/div/div[3]/input[1]")).Click();
-                ReturnStatus = "Pass";
-                ReturnMessage = $"The certification {item.Certificate}  was added to the list successfully.";
+                addCertItemBtn.Click();
+
+                if (certSuccessMessage.Displayed)
+                {
+                    ReturnStatus = "Pass";
+                    ReturnMessage = $"The certification {item.Certificate} was added to the list successfully.";
+                }
+                else if (certErrorMessage.Displayed)
+                {
+                    ReturnStatus = "Fail";
+                    ReturnMessage = $"The certification {item.Certificate} was not added to the list.";
+                }
+                else
+                {
+                    ReturnStatus = "Fail";
+                    ReturnMessage = $"The certification {item.Certificate} was not added to the list.";
+                }
             }
+            Thread.Sleep(8000);
             return new ReturnObjContainer(ReturnStatus, ReturnMessage);
         }
 
-        private static void EnterCertificate(JsonLibHelper.CertificateData item)
+        public void EnterCertificate(JsonLibHelper.CertificateData item)
         {
             TurnOnWait();
-            IWebElement certificationName = driver.FindElement(By.Name("certificationName"));
-            certificationName.Clear();
-            certificationName.SendKeys(item.Certificate);
+            TurnOnWait();
+            certNameTxt.Clear();
+            certNameTxt.SendKeys(item.Certificate);
 
-            IWebElement certificationFrom = driver.FindElement(By.Name("certificationFrom"));
-            certificationFrom.Clear();
-            certificationFrom.SendKeys(item.From);
+            certFromTxt.Clear();
+            certFromTxt.SendKeys(item.From);
 
-            SelectElement selectCertificationYear = new SelectElement(driver.FindElement(By.Name("certificationYear")));
-            selectCertificationYear.SelectByText(item.Year);
+            certYearSel.SelectByText(item.Year);
         }
 
         public JsonLibHelper.ReturnObjContainer EnterEditCertificate(JsonLibHelper.CertificateData item)
         {
-
-            driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/tbody[1]/tr/td[4]/span[1]/i")).Click();
+            editCertBtn.Click();
             EnterCertificate(item);
-            driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/tbody/tr/td/div/span/input[1]")).Click();
-            ReturnStatus = "Pass";
-            ReturnMessage = "";
+            updateCertBtn.Click();
+
+            if (certSuccessMessage.Displayed)
+            {
+                ReturnStatus = "Pass";
+                ReturnMessage = $"The certification {item.Certificate} was updated to the list successfully.";
+            }
+            else if (certErrorMessage.Displayed)
+            {
+                ReturnStatus = "Fail";
+                ReturnMessage = $"The certification {item.Certificate} was not in the list to the list.";
+            }
+            else
+            {
+                ReturnStatus = "Fail";
+                ReturnMessage = $"There was error in editing {item.Certificate}.";
+            }
+            Thread.Sleep(8000);
             return new ReturnObjContainer(ReturnStatus, ReturnMessage);
         }
 
         public JsonLibHelper.ReturnObjContainer DeleteCertificate(JsonLibHelper.CertificateData item)
         {
-            driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[5]/div[1]/div[2]/div/table/tbody/tr/td[4]/span[2]/i")).Click();
-            ReturnStatus = "Pass";
-            ReturnMessage = $"The certification {item.Certificate}  was deleted successfully.";
-            return new ReturnObjContainer(ReturnStatus, ReturnMessage);
-            
-        }
-    }
+            deleteCertBtn.Click();
 
-
-    /*
-     Kanjula code
-
-    Assert.IsTrue(IsDataVisibleInTableRow(certificationsTable, certification), "Certification is not added successfully");
-
-
-    private bool IsDataVisibleInTableRow(IWebElement table, string qualification)
-    {
-        IReadOnlyCollection<IWebElement> tableRows = table.FindElements(By.TagName("tbody"));
-
-        foreach (IWebElement row in tableRows)
-        {
-            IEnumerable<IWebElement> tableData = row.FindElements(By.TagName("td"));
-
-            foreach (IWebElement data in tableData)
+            if (certSuccessMessage.Displayed)
             {
-                if (data.Text.Contains(qualification))
-                {
-                    return true;
-                }
+                ReturnStatus = "Pass";
+                ReturnMessage = $"The certification {item.Certificate}  was deleted successfully.";
             }
+            else if (certErrorMessage.Displayed)
+            {
+                ReturnStatus = "Fail";
+                ReturnMessage = $"The certification {item.Certificate} was not in the list to the list.";
+            }
+            else
+            {
+                ReturnStatus = "Fail";
+                ReturnMessage = $"There was error in deleting {item.Certificate}.";
+            }
+            Thread.Sleep(8000);
+            return new ReturnObjContainer(ReturnStatus, ReturnMessage);
         }
-        return false;
     }
-    */
 }

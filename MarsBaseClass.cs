@@ -35,7 +35,7 @@ namespace CompetitionTaskMars
             driver.Manage().Window.Maximize();
             //ExtentReportLibHelper.CreateTest(TestContext.CurrentContext.Test.MethodName);
         }
-       
+
         public static void NavigateUrl()
         {
             driver.Navigate().GoToUrl(BaseUrl);
