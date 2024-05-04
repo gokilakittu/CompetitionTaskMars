@@ -2,6 +2,8 @@
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium;
 using NUnit.Framework;
+using AventStack.ExtentReports.Reporter;
+using AventStack.ExtentReports;
 
 namespace CompetitionTaskMars
 {
@@ -11,10 +13,21 @@ namespace CompetitionTaskMars
     implicit wait
     delete cookie
     maximize window*/
+
+    [SetUpFixture]
     public class MarsBaseClass
     {
         public static IWebDriver driver;
-        
+
+        protected ExtentReports extent;
+        protected ExtentTest test;
+
+        public void InitializeReport()
+        {
+            var htmlReporter = new ExtentHtmlReporter(ConstantHelpers.extendReportsPath);
+            extent = new ExtentReports();
+            extent.AttachReporter(htmlReporter);
+        }
         public static void Initialize()
         {
             driver = new ChromeDriver();
@@ -22,7 +35,7 @@ namespace CompetitionTaskMars
             driver.Manage().Window.Maximize();
             //ExtentReportLibHelper.CreateTest(TestContext.CurrentContext.Test.MethodName);
         }
-
+       
         public static void NavigateUrl()
         {
             driver.Navigate().GoToUrl(BaseUrl);
@@ -48,7 +61,8 @@ namespace CompetitionTaskMars
         //Close the browser
         public static void CleanUp()
         {
-            driver.Quit();
+            driver.Close();
+            //driver.Quit();
         }
 
         public static void NavigateToProfileEducation()
@@ -62,5 +76,9 @@ namespace CompetitionTaskMars
 
         }
 
+        public void FinalizeReport()
+        {
+            extent.Flush();
+        }
     }
 }
